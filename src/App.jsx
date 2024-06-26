@@ -78,73 +78,193 @@ function App() {
     setAnime(item);
     setDraw(false);
   };
-  
-  const [yearselect, setYS] = useState("2024-春");
-  const [videorank,setvideo]=useState("ビリ")
-  const [viewrank,setview]=useState("ビリ")
-  const [likerank,setlike]=useState("ビリ")
-  const [commentrank,setcomment]=useState("ビリ")
+
+  const [yearselect, setYS] = useState("2023-冬");
+  const [videorank, setvideo] = useState("ビリ")
+  const [viewrank, setview] = useState("ビリ")
+  const [likerank, setlike] = useState("ビリ")
+  const [commentrank, setcomment] = useState("ビリ")
+  const [selectanime, setAn] = useState()
+  const [selectcount,setselectC]=useState("videocount")
   useEffect(() => {
-    const animedata = (sortData.filter((an) => an["videodate"][yearselect]!=null));
+    const animedata = (sortData.filter((an) => an["videodate"][yearselect] != null));
 
     const animerankvideo = animedata.slice().sort((a, b) => b["videodate"][yearselect]["videocount"] - a["videodate"][yearselect]["videocount"]);
     const animerankview = animedata.slice().sort((a, b) => b["videodate"][yearselect]["viewcount"] - a["videodate"][yearselect]["viewcount"]);
     const animesort = animedata.slice().sort((a, b) => b["videodate"][yearselect]["likecount"] - a["videodate"][yearselect]["likecount"]);
     const animerankcomment = animedata.slice().sort((a, b) => b["videodate"][yearselect]["comentcount"] - a["videodate"][yearselect]["comentcount"]);
+    setAn(sortData.filter((an) => an["name"] == anime)[0])
 
-    animerankvideo.map((animes,i)=>{
-      if(animes["name"]==anime){
-        let a="第"
-        a+=String(i+1)
-        a+="位"
+    let countvideo=0
+    let countview=0
+    let countlike=0
+    let countcomment=0
+
+    animerankvideo.map((animes, i) => {
+      if (animes["name"] == anime) {
+        let a = "第"
+        a += String(i + 1)
+        a += "位"
         setvideo(a)
+        countvideo+=1
       }
-    
-      if(animerankview[i]["name"]==anime){
-        let a="第"
-        a+=String(i+1)
-        a+="位"
+
+      if (animerankview[i]["name"] == anime) {
+        let a = "第"
+        a += String(i + 1)
+        a += "位"
         setview(a)
+        countview+=1
       }
-    
-      if(animesort[i]["name"]==anime){
-        let a="第"
-        a+=String(i+1)
-        a+="位"
+
+      if (animesort[i]["name"] == anime) {
+        let a = "第"
+        a += String(i + 1)
+        a += "位"
         setlike(a)
+        countlike+=1
       }
-    
-      if(animerankcomment[i]["name"]==anime){
-        let a="第"
-        a+=String(i+1)
-        a+="位"
+
+      if (animerankcomment[i]["name"] == anime) {
+        let a = "第"
+        a += String(i + 1)
+        a += "位"
         setcomment(a)
+        countcomment+=1
       }
     })
-  }, [yearselect]);
+    if(countvideo==0){
+      setvideo("ビリ")
+    }
+    if(countview==0){
+      setview("ビリ")
+    }
+    if(countlike==0){
+      setlike("ビリ")
+    }
+    if(countcomment==0){
+      setcomment("ビリ")
+    }
+
+  }, [sortData, yearselect, anime]);
+  function clickyear(item){
+    
+    setYS(item)
+    
+  }
+
+  const makeTxt = () => {
+    if (selectanime != undefined) {
+      let count = 0;
+      let a = [];
+      let start = String(selectanime["year"]) + "-";
+      let as = "";
+      for (let i = 2013; i < 2024; i++) {
+        for (let j = 1; j < 5; j++) {
+          count += 1;
+          if (j == 1) {
+            as = "春";
+          } else if (j == 2) {
+            as = "夏";
+          } else if (j == 3) {
+            as = "秋";
+          } else {
+            as = "冬";
+          }
+          if (i == selectanime["year"] && j == selectanime["n"]) {
+            start += as;
+          }
+          a.push(String(i) + "-" + as);
+        }
+      }
+      let ymax = 0;
+      a.forEach((item, index) => {
+        if (selectanime["videodate"][item] != null) {
+          if (selectanime["videodate"][item][selectcount] > ymax) {
+            ymax = selectanime["videodate"][item][selectcount];
+          }
+        }
+      });
+      console.log(ymax)
+  
+      const yScale = d3.scaleLinear()
+        .domain([0, (Math.floor(ymax / 100) + 1) * 100])
+        .range([0, 500])
+        .nice();
+      
+  
+      return (
+        <svg width={50 + a.length * 50} height={550}>
+          <text x={0} y={15} onClick={()=>clickyear(start)}>放送開始日:{start}</text>
+          {a.map((item, index) => {
+            const cyValue = selectanime["videodate"][item] != null ? 500-yScale(selectanime["videodate"][item][selectcount]) : 500-yScale(0);
+  
+            return (
+              <g key={item} onClick={()=>clickyear(item)}>
+                <text x={30 * index + 50-5} y="510" fontSize="10" strokeWidth="0" fill={start !== item ? "black" : "red"}>
+                  {item.split("-")[1]}
+                </text>
+                {index < a.length - 1 && (
+                  <line
+                    x1={30 * index + 50}
+                    y1={cyValue}
+                    x2={30 * (index + 1) + 50}
+                    y2={selectanime["videodate"][a[index + 1]] != null ? 500-yScale(selectanime["videodate"][a[index + 1]][selectcount]) : 500-yScale(0)}
+                    stroke="black"
+                  />
+                )}
+                <circle cx={30 * index + 50} cy={cyValue} r={5} fill={item==yearselect ? "red":"black"} />
+              </g>
+            );
+          })}
+        </svg>
+      );
+    }
+    return null;
+  };
+  
+
 
   const draws = () => {
- 
+
+
     return (
       <div>
         <h1>{anime}</h1>
         <div>
-        
+
           <h2>{yearselect}</h2></div>
-        
-        
+
+
         <div>
           <text>動画の総数　{videorank}</text>
-          </div>
-          <div>
-          <text>動画視聴回数の総数　{viewrank}</text>
-          </div>
-          <text>いいねの総数　{likerank}</text>
-          <div>
-          <text>コメントの総数　{commentrank}</text>
-          </div>
         </div>
-    
+        <div>
+          <text>動画視聴回数の総数　{viewrank}</text>
+        </div>
+        <text>いいねの総数　{likerank}</text>
+        <div>
+          <text>コメントの総数　{commentrank}</text>
+        </div>
+        <div>
+          <select onChange={(e) => setselectC(e.target.value)}>
+          <option value="videocount">Video Count</option>
+            <option value="viewcount">View Count</option>
+            <option value="likecount">Like Count</option>
+            <option value="comentcount">Comment Count</option>
+          </select>
+        </div>
+        <div>
+          {makeTxt()}
+          </div>
+
+
+          <div>
+            <button onClick={()=>setDraw(true)}>戻る</button>
+          </div>
+
+      </div>
+
     );
   };
 
@@ -177,7 +297,7 @@ function App() {
                 fill="black"
                 strokeWidth="0"
               >
-                {item["name"]}:{item[select]}回
+                {item["name"]}:{item[select]}{select !== "videoCount" ? "回" : "個"}
               </text>
             </g>
           ))}
@@ -185,6 +305,8 @@ function App() {
       </div>
     );
   } else {
+
+
     return (
       <div>
         {draws()}
