@@ -45,6 +45,7 @@ function App() {
         // videodateの初期化
         if (!anime["videodate"][videoyear]) {
           anime["videodate"][videoyear] = {
+            trendcount:0,
             videocount: 0,
             viewcount: 0,
             likecount: 0,
@@ -90,9 +91,9 @@ function App() {
     const animedata = (sortData.filter((an) => an["videodate"][yearselect] != null));
 
     const animerankvideo = animedata.slice().sort((a, b) => b["videodate"][yearselect]["videocount"] - a["videodate"][yearselect]["videocount"]);
-    const animerankview = animedata.slice().sort((a, b) => b["videodate"][yearselect]["viewcount"] - a["videodate"][yearselect]["viewcount"]);
-    const animesort = animedata.slice().sort((a, b) => b["videodate"][yearselect]["likecount"] - a["videodate"][yearselect]["likecount"]);
-    const animerankcomment = animedata.slice().sort((a, b) => b["videodate"][yearselect]["comentcount"] - a["videodate"][yearselect]["comentcount"]);
+    const animerankview = animedata.slice().sort((a, b) => b["videodate"][yearselect]["viewcount"]/b["videodate"][yearselect]["videocount"] - a["videodate"][yearselect]["viewcount"]/a["videodate"][yearselect]["videocount"]);
+    const animesort = animedata.slice().sort((a, b) => b["videodate"][yearselect]["likecount"]/b["videodate"][yearselect]["videocount"] - a["videodate"][yearselect]["likecount"]/a["videodate"][yearselect]["videocount"]);
+    const animerankcomment = animedata.slice().sort((a, b) => b["videodate"][yearselect]["comentcount"]/b["videodate"][yearselect]["videocount"] - a["videodate"][yearselect]["comentcount"]/a["videodate"][yearselect]["videocount"]);
     setAn(sortData.filter((an) => an["name"] == anime)[0])
 
     let countvideo = 0
@@ -194,7 +195,6 @@ function App() {
     path1.lineTo(wid, hei / 2)
     path1.closePath();
 
-    console.log(videorank,viewrank,likerank,commentrank)
 
     const path2 = d3.path();
     path2.moveTo(wid / 2, yScale(videorank-1));
