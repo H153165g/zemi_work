@@ -85,7 +85,7 @@ function App() {
   const [likerank, setlike] = useState("ビリ")
   const [commentrank, setcomment] = useState("ビリ")
   const [selectanime, setAn] = useState()
-  const [selectcount,setselectC]=useState("videocount")
+  const [selectcount, setselectC] = useState("videocount")
   useEffect(() => {
     const animedata = (sortData.filter((an) => an["videodate"][yearselect] != null));
 
@@ -95,10 +95,10 @@ function App() {
     const animerankcomment = animedata.slice().sort((a, b) => b["videodate"][yearselect]["comentcount"] - a["videodate"][yearselect]["comentcount"]);
     setAn(sortData.filter((an) => an["name"] == anime)[0])
 
-    let countvideo=0
-    let countview=0
-    let countlike=0
-    let countcomment=0
+    let countvideo = 0
+    let countview = 0
+    let countlike = 0
+    let countcomment = 0
 
     animerankvideo.map((animes, i) => {
       if (animes["name"] == anime) {
@@ -106,7 +106,7 @@ function App() {
         a += String(i + 1)
         a += "位"
         setvideo(a)
-        countvideo+=1
+        countvideo += 1
       }
 
       if (animerankview[i]["name"] == anime) {
@@ -114,7 +114,7 @@ function App() {
         a += String(i + 1)
         a += "位"
         setview(a)
-        countview+=1
+        countview += 1
       }
 
       if (animesort[i]["name"] == anime) {
@@ -122,7 +122,7 @@ function App() {
         a += String(i + 1)
         a += "位"
         setlike(a)
-        countlike+=1
+        countlike += 1
       }
 
       if (animerankcomment[i]["name"] == anime) {
@@ -130,27 +130,102 @@ function App() {
         a += String(i + 1)
         a += "位"
         setcomment(a)
-        countcomment+=1
+        countcomment += 1
       }
     })
-    if(countvideo==0){
+    if (countvideo == 0) {
       setvideo("ビリ")
     }
-    if(countview==0){
+    if (countview == 0) {
       setview("ビリ")
     }
-    if(countlike==0){
+    if (countlike == 0) {
       setlike("ビリ")
     }
-    if(countcomment==0){
+    if (countcomment == 0) {
       setcomment("ビリ")
     }
 
   }, [sortData, yearselect, anime]);
-  function clickyear(item){
-    
+  function clickyear(item) {
+
     setYS(item)
+
+  }
+  const ranks=(rank)=>{
+    let r=""
+    rank.map((item)=>{
+      if(item!="第" && item!="位"){
+        r+=item
+      }
+    })
+    return Number(r)
+  }
+
+  const maketriangle = (videoranks, viewranks, likeranks, commentranks) => {
+    const p = 2
+    const wid = 80 * p
+    const hei = 80 * p
+
+    const videorank=ranks([...videoranks])
+    const viewrank=ranks([...viewranks])
+    const likerank=ranks([...likeranks])
+    const commentrank=ranks([...commentranks])
+
     
+
+
+    const xScale = d3.scaleLinear()
+      .domain([0, 30])
+      .range([0, wid / 2])
+      .nice();
+
+
+    const yScale = d3.scaleLinear()
+      .domain([0, 30])
+      .range([0, hei / 2])
+      .nice();
+
+
+    const path1 = d3.path();
+    path1.moveTo(wid / 2, 0);
+    path1.lineTo(0, hei / 2);
+    path1.lineTo(wid / 2, hei);
+    path1.lineTo(wid, hei / 2)
+    path1.closePath();
+
+    console.log(videorank,viewrank,likerank,commentrank)
+
+    const path2 = d3.path();
+    path2.moveTo(wid / 2, yScale(videorank-1));
+    path2.lineTo(xScale(viewrank-1), hei / 2);
+    path2.lineTo(wid / 2, hei-yScale(likerank-1));
+    path2.lineTo(wid-xScale(commentrank-1), hei / 2)
+    path2.closePath();
+
+
+    return (
+      <svg width={wid} height={hei}>
+        <path d={path1.toString()} fill="none" stroke="black" />
+        <path d={path2.toString()} fill="blue" stroke="blue" />
+        <line
+          x1={0}
+          y1={hei/2}
+          x2={wid}
+          y2={hei/2}
+          stroke="black"
+        />
+        <line
+          x1={wid/2}
+          y1={0}
+          x2={wid/2}
+          y2={hei}
+          stroke="black"
+        />
+
+      </svg>
+    )
+
   }
 
   const makeTxt = () => {
@@ -186,22 +261,23 @@ function App() {
         }
       });
       console.log(ymax)
-  
+
       const yScale = d3.scaleLinear()
         .domain([0, (Math.floor(ymax / 100) + 1) * 100])
         .range([0, 500])
         .nice();
-      
-  
+
+
       return (
+
         <svg width={50 + a.length * 50} height={550}>
-          <text x={0} y={15} onClick={()=>clickyear(start)}>放送開始日:{start}</text>
+          <text x={0} y={15} onClick={() => clickyear(start)}>放送開始日:{start}</text>
           {a.map((item, index) => {
-            const cyValue = selectanime["videodate"][item] != null ? 500-yScale(selectanime["videodate"][item][selectcount]) : 500-yScale(0);
-  
+            const cyValue = selectanime["videodate"][item] != null ? 500 - yScale(selectanime["videodate"][item][selectcount]) : 500 - yScale(0);
+
             return (
-              <g key={item} onClick={()=>clickyear(item)}>
-                <text x={30 * index + 50-5} y="510" fontSize="10" strokeWidth="0" fill={start !== item ? "black" : "red"}>
+              <g key={item} onClick={() => clickyear(item)}>
+                <text x={30 * index + 50 - 5} y="510" fontSize="10" strokeWidth="0" fill={start !== item ? "black" : "red"}>
                   {item.split("-")[1]}
                 </text>
                 {index < a.length - 1 && (
@@ -209,20 +285,21 @@ function App() {
                     x1={30 * index + 50}
                     y1={cyValue}
                     x2={30 * (index + 1) + 50}
-                    y2={selectanime["videodate"][a[index + 1]] != null ? 500-yScale(selectanime["videodate"][a[index + 1]][selectcount]) : 500-yScale(0)}
+                    y2={selectanime["videodate"][a[index + 1]] != null ? 500 - yScale(selectanime["videodate"][a[index + 1]][selectcount]) : 500 - yScale(0)}
                     stroke="black"
                   />
                 )}
-                <circle cx={30 * index + 50} cy={cyValue} r={5} fill={item==yearselect ? "red":"black"} />
+                <circle cx={30 * index + 50} cy={cyValue} r={5} fill={item == yearselect ? "red" : "black"} />
               </g>
             );
           })}
         </svg>
+
       );
     }
     return null;
   };
-  
+
 
 
   const draws = () => {
@@ -248,20 +325,24 @@ function App() {
         </div>
         <div>
           <select onChange={(e) => setselectC(e.target.value)}>
-          <option value="videocount">Video Count</option>
+            <option value="videocount">Video Count</option>
             <option value="viewcount">View Count</option>
             <option value="likecount">Like Count</option>
             <option value="comentcount">Comment Count</option>
           </select>
         </div>
         <div>
+          {maketriangle(videorank, viewrank, likerank, commentrank)}
+        </div>
+        <div>
+
           {makeTxt()}
-          </div>
+        </div>
 
 
-          <div>
-            <button onClick={()=>setDraw(true)}>戻る</button>
-          </div>
+        <div>
+          <button onClick={() => setDraw(true)}>戻る</button>
+        </div>
 
       </div>
 
@@ -282,7 +363,7 @@ function App() {
         </div>
         <svg width={width} height={height}>
           {sortData.map((item, i) => (
-            <g key={i} transform={`translate(0, ${20 * i + 20})`} onClick={(e) => g(item["name"])}>
+            <g key={i} transform={`translate(0, ${20 * i + 20})`} transition="margin-right 4s" onClick={(e) => g(item["name"])}>
               <rect
                 x="0"
                 y="0"
