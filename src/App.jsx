@@ -194,6 +194,7 @@ function App() {
     path1.lineTo(wid / 2, hei);
     path1.lineTo(wid, hei / 2)
     path1.closePath();
+    console.log(anime)
 
 
     const path2 = d3.path();
@@ -225,6 +226,17 @@ function App() {
 
       </svg>
     )
+
+  }
+  const selectcounts=(item,yScale)=>{
+    let cyValue=0
+    if(selectcount=="videocount"){
+      cyValue = item != null ? 500 - yScale(item[selectcount]) : 500 - yScale(0);
+    } else {
+      cyValue = item != null ? 500 - yScale(item[selectcount]/item["videocount"]) : 500 - yScale(0);
+    
+    }
+    return cyValue;
 
   }
 
@@ -273,7 +285,8 @@ function App() {
         <svg width={50 + a.length * 50} height={550}>
           <text x={0} y={15} onClick={() => clickyear(start)}>放送開始日:{start}</text>
           {a.map((item, index) => {
-            const cyValue = selectanime["videodate"][item] != null ? 500 - yScale(selectanime["videodate"][item][selectcount]) : 500 - yScale(0);
+            const cyValue=selectcounts(selectanime["videodate"][item],yScale)
+            
 
             return (
               <g key={item} onClick={() => clickyear(item)}>
@@ -285,7 +298,7 @@ function App() {
                     x1={30 * index + 50}
                     y1={cyValue}
                     x2={30 * (index + 1) + 50}
-                    y2={selectanime["videodate"][a[index + 1]] != null ? 500 - yScale(selectanime["videodate"][a[index + 1]][selectcount]) : 500 - yScale(0)}
+                    y2={selectcounts(selectanime["videodate"][a[index + 1]],yScale)}
                     stroke="black"
                   />
                 )}
