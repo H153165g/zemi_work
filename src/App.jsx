@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import * as d3 from "d3";
 import animeData from "/data/anime.json";
 import videoData from "/data/video.json";
+import '/styles.css';
 
 function App() {
   const [width, setWidth] = useState(1750);
   const [height, setHeight] = useState(animeData.length * 20 + 20);
   const [select, setSelect] = useState("viewCount");
   const [sortData, setSort] = useState([]);
-  const [draw, setDraw] = useState(true);
+  const [draw, setDraw] = useState(0);
   const [anime, setAnime] = useState("");
 
   useEffect(() => {
@@ -49,7 +50,11 @@ function App() {
             videocount: 0,
             viewcount: 0,
             likecount: 0,
-            comentcount: 0
+            comentcount: 0,
+            videorank: 10000,
+            viewrank: 10000,
+            likerank: 10000,
+            commentrank: 10000
           };
         }
 
@@ -77,7 +82,7 @@ function App() {
   const g = (item) => {
 
     setAnime(item);
-    setDraw(false);
+    setDraw(1);
   };
 
   const [yearselect, setYS] = useState("2023-冬");
@@ -91,9 +96,9 @@ function App() {
     const animedata = (sortData.filter((an) => an["videodate"][yearselect] != null));
 
     const animerankvideo = animedata.slice().sort((a, b) => b["videodate"][yearselect]["videocount"] - a["videodate"][yearselect]["videocount"]);
-    const animerankview = animedata.slice().sort((a, b) => b["videodate"][yearselect]["viewcount"]/b["videodate"][yearselect]["videocount"] - a["videodate"][yearselect]["viewcount"]/a["videodate"][yearselect]["videocount"]);
-    const animesort = animedata.slice().sort((a, b) => b["videodate"][yearselect]["likecount"]/b["videodate"][yearselect]["videocount"] - a["videodate"][yearselect]["likecount"]/a["videodate"][yearselect]["videocount"]);
-    const animerankcomment = animedata.slice().sort((a, b) => b["videodate"][yearselect]["comentcount"]/b["videodate"][yearselect]["videocount"] - a["videodate"][yearselect]["comentcount"]/a["videodate"][yearselect]["videocount"]);
+    const animerankview = animedata.slice().sort((a, b) => b["videodate"][yearselect]["viewcount"] - a["videodate"][yearselect]["viewcount"]);
+    const animesort = animedata.slice().sort((a, b) => b["videodate"][yearselect]["likecount"] - a["videodate"][yearselect]["likecount"]);
+    const animerankcomment = animedata.slice().sort((a, b) => b["videodate"][yearselect]["comentcount"] - a["videodate"][yearselect]["comentcount"]);
     setAn(sortData.filter((an) => an["name"] == anime)[0])
 
     let countvideo = 0
@@ -103,33 +108,30 @@ function App() {
 
     animerankvideo.map((animes, i) => {
       if (animes["name"] == anime) {
-        let a = "第"
-        a += String(i + 1)
-        a += "位"
+        
+        const a = String(i + 1)
+  
         setvideo(a)
         countvideo += 1
       }
 
       if (animerankview[i]["name"] == anime) {
-        let a = "第"
-        a += String(i + 1)
-        a += "位"
+      
+        const a = String(i + 1)
         setview(a)
         countview += 1
       }
 
       if (animesort[i]["name"] == anime) {
-        let a = "第"
-        a += String(i + 1)
-        a += "位"
+        const a = String(i + 1)
         setlike(a)
         countlike += 1
       }
 
       if (animerankcomment[i]["name"] == anime) {
-        let a = "第"
-        a += String(i + 1)
-        a += "位"
+        
+        const a = String(i + 1)
+        
         setcomment(a)
         countcomment += 1
       }
@@ -177,13 +179,13 @@ function App() {
 
 
     const xScale = d3.scaleLinear()
-      .domain([0, 30])
+      .domain([0, 100])
       .range([0, wid / 2])
       .nice();
 
 
     const yScale = d3.scaleLinear()
-      .domain([0, 30])
+      .domain([0, 100])
       .range([0, hei / 2])
       .nice();
 
@@ -233,7 +235,7 @@ function App() {
     if(selectcount=="videocount"){
       cyValue = item != null ? 500 - yScale(item[selectcount]) : 500 - yScale(0);
     } else {
-      cyValue = item != null ? 500 - yScale(item[selectcount]/item["videocount"]) : 500 - yScale(0);
+      cyValue = item != null ? 500 - yScale(item[selectcount]) : 500 - yScale(0);
     
     }
     return cyValue;
@@ -282,7 +284,7 @@ function App() {
 
       return (
 
-        <svg width={50 + a.length * 50} height={550}>
+        <svg width={a.length * 40-360} height={550}>
           <text x={0} y={15} onClick={() => clickyear(start)}>放送開始日:{start}</text>
           {a.map((item, index) => {
             const cyValue=selectcounts(selectanime["videodate"][item],yScale)
@@ -321,48 +323,158 @@ function App() {
     return (
       <div>
         <h1>{anime}</h1>
+
+          <h1>{yearselect}</h1>
+          <div className="container">
+  
+  <div className="ranking">
         <div>
+          <button onClick={(e)=>{
+            const animedata = (sortData.filter((an) => an["videodate"][yearselect] != null));
+            const animerankvideo = animedata.slice().sort((a, b) => b["videodate"][yearselect]["videocount"] - a["videodate"][yearselect]["videocount"]);
+            let found=""
+            for(let i=0;i<animerankvideo.length;i++){
+              if(animerankvideo[i]["name"]==anime){
+                break
+              }
+              found=animerankvideo[i]["name"]
+            }
+            setAnime(found)
+          
 
-          <h2>{yearselect}</h2></div>
-
-
-        <div>
-          <text>動画の総数　{videorank}</text>
+          }}>前</button>
+          <text>　動画　　総数　第{videorank}位</text>
+          <button onClick={(e)=>{
+            const animedata = (sortData.filter((an) => an["videodate"][yearselect] != null));
+            const animerankvideo = animedata.slice().sort((a, b) => b["videodate"][yearselect]["videocount"] - a["videodate"][yearselect]["videocount"]);
+            let found=""
+            for(let i=0;i<animerankvideo.length;i++){
+              found=animerankvideo[i+1]["name"]
+              if(animerankvideo[i]["name"]==anime){
+                break
+              }
+            }
+            setAnime(found)
+          }}>後</button>
         </div>
         <div>
-          <text>動画視聴回数の総数　{viewrank}</text>
+        <button onClick={(e)=>{
+            const animedata = (sortData.filter((an) => an["videodate"][yearselect] != null));
+            const animerankvideo = animedata.slice().sort((a, b) => b["videodate"][yearselect]["viewcount"] - a["videodate"][yearselect]["viewcount"]);
+            let found=""
+            for(let i=0;i<animerankvideo.length;i++){
+              if(animerankvideo[i]["name"]==anime){
+                break
+              }
+              found=animerankvideo[i]["name"]
+            }
+            setAnime(found)
+          }}>前</button>
+          <text>視聴回数　総数　第{viewrank}位</text>
+          <button onClick={(e)=>{
+            const animedata = (sortData.filter((an) => an["videodate"][yearselect] != null));
+            const animerankvideo = animedata.slice().sort((a, b) => b["videodate"][yearselect]["viewcount"] - a["videodate"][yearselect]["viewcount"]);
+            let found=""
+            for(let i=0;i<animerankvideo.length;i++){
+              found=animerankvideo[i+1]["name"]
+              if(animerankvideo[i]["name"]==anime){
+                break
+              }
+            }
+            setAnime(found)
+          }}>後</button>
         </div>
-        <text>いいねの総数　{likerank}</text>
         <div>
-          <text>コメントの総数　{commentrank}</text>
+        <button onClick={(e)=>{
+            const animedata = (sortData.filter((an) => an["videodate"][yearselect] != null));
+            const animerankvideo = animedata.slice().sort((a, b) => b["videodate"][yearselect]["likecount"] - a["videodate"][yearselect]["likecount"]);
+            let found=""
+            for(let i=0;i<animerankvideo.length;i++){
+              if(animerankvideo[i]["name"]==anime){
+                break
+              }
+              found=animerankvideo[i]["name"]
+            }
+            setAnime(found)
+          }}>前</button>
+        <text>いいね　　総数　第{likerank}位</text>
+        <button onClick={(e)=>{
+            const animedata = (sortData.filter((an) => an["videodate"][yearselect] != null));
+            const animerankvideo = animedata.slice().sort((a, b) => b["videodate"][yearselect]["likecount"] - a["videodate"][yearselect]["likecount"]);
+            let found=""
+            for(let i=0;i<animerankvideo.length;i++){
+              found=animerankvideo[i+1]["name"]
+              if(animerankvideo[i]["name"]==anime){
+                break
+              }
+            }
+            setAnime(found)
+          }}>後</button>
+          </div>
+        <div>
+          <button onClick={(e)=>{
+            const animedata = (sortData.filter((an) => an["videodate"][yearselect] != null));
+            const animerankvideo = animedata.slice().sort((a, b) => b["videodate"][yearselect]["comentcount"] - a["videodate"][yearselect]["comentcount"]);
+            let found=""
+            for(let i=0;i<animerankvideo.length;i++){
+              if(animerankvideo[i]["name"]==anime){
+                break
+              }
+              found=animerankvideo[i]["name"]
+            }
+            setAnime(found)
+          }}>前</button>
+          <text>コメント　総数　第{commentrank}位</text>
+          <button onClick={(e)=>{
+            const animedata = (sortData.filter((an) => an["videodate"][yearselect] != null));
+            const animerankvideo = animedata.slice().sort((a, b) => b["videodate"][yearselect]["comentcount"] - a["videodate"][yearselect]["comentcount"]);
+            let found=""
+            for(let i=0;i<animerankvideo.length;i++){
+              found=animerankvideo[i+1]["name"]
+              if(animerankvideo[i]["name"]==anime){
+                break
+              }
+            }
+            setAnime(found)
+          }}>後</button>
+          
+        </div>
+        </div>
+        
+        <div className="triangle-container">
+    {maketriangle(videorank, viewrank, likerank, commentrank)}
+    
+    
+          
+          
+        </div>
         </div>
         <div>
-          <select onChange={(e) => setselectC(e.target.value)}>
+        <select onChange={(e) => setselectC(e.target.value)}>
             <option value="videocount">Video Count</option>
             <option value="viewcount">View Count</option>
             <option value="likecount">Like Count</option>
             <option value="comentcount">Comment Count</option>
           </select>
-        </div>
-        <div>
-          {maketriangle(videorank, viewrank, likerank, commentrank)}
-        </div>
-        <div>
 
+        </div>
+
+
+        <div>
+          
           {makeTxt()}
         </div>
-
-
-        <div>
-          <button onClick={() => setDraw(true)}>戻る</button>
-        </div>
+        
+        <button onClick={() => setDraw(0)}>戻る</button>
 
       </div>
 
     );
   };
 
-  if (draw) {
+
+
+  if (draw==0) {
     return (
       <div>
         <h1>Anime and Video Data</h1>
@@ -398,7 +510,7 @@ function App() {
         </svg>
       </div>
     );
-  } else {
+  } else if(draw==1) {
 
 
     return (
@@ -406,6 +518,10 @@ function App() {
         {draws()}
       </div>
     );
+  } else if(draw==2){
+    <div>
+      {ranking()}
+    </div>
   }
 }
 
