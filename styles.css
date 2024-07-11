@@ -25,6 +25,11 @@ body {
     align-items: flex-start; /* コンテンツの高さを揃える */
     gap: 20px; /* コンテンツ間の間隔 */
   }
+  .parent-container {
+    display: flex;
+    justify-content: center; /* 水平方向の中央揃え */
+  }
+  
   .triangle-container {
     flex-shrink: 0; /* サイズが縮まないようにする */
     justify-content: center; /* コンテンツを中央に配置 */

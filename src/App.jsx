@@ -440,6 +440,7 @@ function App() {
           
         </div>
         </div>
+      <div className="parent-container">
         
         <div className="triangle-container">
     {maketriangle(videorank, viewrank, likerank, commentrank)}
@@ -447,6 +448,7 @@ function App() {
     
           
           
+        </div>
         </div>
         </div>
         <div>
