@@ -5,22 +5,34 @@ import videoData from "/data/video.json";
 import '/styles.css';
 
 function App() {
-  const [width, setWidth] = useState(1750);
-  const [height, setHeight] = useState(animeData.length * 20 + 20);
   const [select, setSelect] = useState("viewCount");
   const [sortData, setSort] = useState([]);
   const [draw, setDraw] = useState(0);
   const [anime, setAnime] = useState("");
+  const [animedata,setadata]=useState([]);
+  const [width, setWidth] = useState(1750);
+  const [height, setHeight] = useState();
 
   useEffect(() => {
-    let updatedAnimeData = animeData.map((anime) => ({
-      ...anime,
+    let i=0
+    let animedatas=[]
+    
+    while(videoData["videos"][videoData["videos"].length-1]["animename"]!=animeData[i]["name"]){
+      animedatas.push(animeData[i]["name"])
+      i++;
+    }
+    console.log(animedatas)
+    let updatedAnimeData = animedatas.map((item) => ({
+      name:item,
       viewCount: 0,
       likeCount: 0,
       commentCount: 0,
       videoCount: 0,
       videodate: {}
     }));
+    console.log(updatedAnimeData);
+    setadata(animedatas)
+    setHeight(animedatas.length* 20 + 20)
 
     videoData["videos"].forEach(video => {
       const anime = updatedAnimeData.find(anime => anime.name === video["animename"]);
@@ -67,6 +79,7 @@ function App() {
 
     setSort(updatedAnimeData);
   }, []);
+  
 
   useEffect(() => {
     setSort(prevSortData => [...prevSortData].sort((a, b) => b[select] - a[select]));
@@ -488,18 +501,18 @@ function App() {
             <option value="videoCount">Video Count</option>
           </select>
         </div>
-        <svg width={width} height={height}>
+        <svg width={width-355} height={height}>
           {sortData.map((item, i) => (
             <g key={i} transform={`translate(0, ${20 * i + 20})`} transition="margin-right 4s" onClick={(e) => g(item["name"])}>
               <rect
                 x="0"
                 y="0"
-                width={xScale(item[select])}
+                width={xScale(item[select])+10}
                 height="20"
                 fill={color(i)}
               />
               <text
-                x={xScale(item[select]) + 5}
+                x={xScale(item[select]) + 15}
                 y="15"
                 fontSize="12"
                 fill="black"
