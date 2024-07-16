@@ -18,19 +18,22 @@ function App() {
     let animedatas=[]
     
     while(videoData["videos"][videoData["videos"].length-1]["animename"]!=animeData[i]["name"]){
-      animedatas.push(animeData[i]["name"])
+      animedatas.push({
+        name:animeData[i]["name"],
+        year:animeData[i]["year"],
+        n:animeData[i]["n"]})
       i++;
     }
-    console.log(animedatas)
     let updatedAnimeData = animedatas.map((item) => ({
-      name:item,
+      name:item["name"],
+      year:item["year"],
+      n:item["n"],
       viewCount: 0,
       likeCount: 0,
       commentCount: 0,
       videoCount: 0,
       videodate: {}
     }));
-    console.log(updatedAnimeData);
     setadata(animedatas)
     setHeight(animedatas.length* 20 + 20)
 
@@ -192,50 +195,55 @@ function App() {
 
 
     const xScale = d3.scaleLinear()
-      .domain([0, 100])
+      .domain([0, animedata.length-1])
       .range([0, wid / 2])
       .nice();
 
 
     const yScale = d3.scaleLinear()
-      .domain([0, 100])
+      .domain([0, animedata.length-1])
       .range([0, hei / 2])
       .nice();
 
 
     const path1 = d3.path();
-    path1.moveTo(wid / 2, 0);
-    path1.lineTo(0, hei / 2);
-    path1.lineTo(wid / 2, hei);
-    path1.lineTo(wid, hei / 2)
+    path1.moveTo(wid / 2+30, 30);
+    path1.lineTo(30, hei / 2+30);
+    path1.lineTo(wid / 2+30, hei+30);
+    path1.lineTo(wid+30, hei / 2+30)
     path1.closePath();
-    console.log(anime)
 
 
     const path2 = d3.path();
-    path2.moveTo(wid / 2, yScale(videorank-1));
-    path2.lineTo(xScale(viewrank-1), hei / 2);
-    path2.lineTo(wid / 2, hei-yScale(likerank-1));
-    path2.lineTo(wid-xScale(commentrank-1), hei / 2)
+    path2.moveTo(wid / 2+30, yScale(videorank-1)+30);
+    path2.lineTo(xScale(viewrank-1)+30, hei / 2+30);
+    path2.lineTo(wid / 2+30, hei-yScale(likerank-1)+30);
+    path2.lineTo(wid-xScale(commentrank-1)+30, hei / 2+30)
     path2.closePath();
 
 
     return (
-      <svg width={wid} height={hei}>
+      <svg width={wid+60} height={hei+60}>
+        <text x={wid/2+15} y={25}>動画</text>
+        <text x={0} y={hei/2+28}>視聴</text>
+        <text x={0} y={hei/2+45}>回数</text>
+        <text x={wid/2+10} y={hei+50}>いいね</text>
+        <text x={wid+30} y={hei/2+28}>コメ</text>
+        <text x={wid+30} y={hei/2+45}>ント</text>
         <path d={path1.toString()} fill="none" stroke="black" />
         <path d={path2.toString()} fill="blue" stroke="blue" />
         <line
-          x1={0}
-          y1={hei/2}
-          x2={wid}
-          y2={hei/2}
+          x1={30}
+          y1={hei/2+30}
+          x2={wid+30}
+          y2={hei/2+30}
           stroke="black"
         />
         <line
-          x1={wid/2}
-          y1={0}
-          x2={wid/2}
-          y2={hei}
+          x1={wid/2+30}
+          y1={0+30}
+          x2={wid/2+30}
+          y2={hei+30}
           stroke="black"
         />
 
@@ -287,25 +295,34 @@ function App() {
           }
         }
       });
-      console.log(ymax)
 
       const yScale = d3.scaleLinear()
         .domain([0, (Math.floor(ymax / 100) + 1) * 100])
         .range([0, 500])
         .nice();
 
+      
 
       return (
 
         <svg width={a.length * 40-360} height={550}>
           <text x={0} y={15} onClick={() => clickyear(start)}>放送開始日:{start}</text>
           {a.map((item, index) => {
+            
             const cyValue=selectcounts(selectanime["videodate"][item],yScale)
+            console.log(selectanime["videodate"][item]==undefined?0:selectanime["videodate"][item])
             
 
             return (
               <g key={item} onClick={() => clickyear(item)}>
-                <text x={30 * index + 50 - 5} y="510" fontSize="10" strokeWidth="0" fill={start !== item ? "black" : "red"}>
+                <text 
+                  x={30 * index + 50 - 5} 
+                  y="510" 
+                  fontSize="10" 
+                  strokeWidth="0" 
+                  fill={start !== item ? "black" : "red"}
+                >
+                  <title>{item}</title> 
                   {item.split("-")[1]}
                 </text>
                 {index < a.length - 1 && (
@@ -313,11 +330,14 @@ function App() {
                     x1={30 * index + 50}
                     y1={cyValue}
                     x2={30 * (index + 1) + 50}
-                    y2={selectcounts(selectanime["videodate"][a[index + 1]],yScale)}
+                    y2={selectcounts(selectanime["videodate"][a[index + 1]], yScale)}
                     stroke="black"
                   />
                 )}
-                <circle cx={30 * index + 50} cy={cyValue} r={5} fill={item == yearselect ? "red" : "black"} />
+            
+                <circle cx={30 * index + 50} cy={cyValue} r={5} fill={item == yearselect ? "red" : "black"}>
+                <title>{selectanime["videodate"][item]==undefined?0:selectanime["videodate"][item][selectcount]}</title> 
+                </circle>
               </g>
             );
           })}
