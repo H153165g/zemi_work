@@ -327,15 +327,15 @@ function App() {
                 </text>
                 {index < a.length - 1 && (
                   <line
-                    x1={30 * index + 50}
+                    x1={30 * index + 52}
                     y1={cyValue}
-                    x2={30 * (index + 1) + 50}
+                    x2={30 * (index + 1) + 52}
                     y2={selectcounts(selectanime["videodate"][a[index + 1]], yScale)}
                     stroke="black"
                   />
                 )}
             
-                <circle cx={30 * index + 50} cy={cyValue} r={5} fill={item == yearselect ? "red" : "black"}>
+                <circle cx={30 * index + 52} cy={cyValue} r={5} fill={item == yearselect ? "red" : "black"}>
                 <title>{selectanime["videodate"][item]==undefined?0:selectanime["videodate"][item][selectcount]}</title> 
                 </circle>
               </g>
