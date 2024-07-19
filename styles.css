@@ -30,12 +30,6 @@ body {
     justify-content: center; /* 水平方向の中央揃え */
   }
   
-  .triangle-container {
-    flex-shrink: 0; /* サイズが縮まないようにする */
-    justify-content: center; /* コンテンツを中央に配置 */
-    margin-left: 285px;
-
-  }
   .ranking {
     display: flex;
     flex-direction: column;
@@ -67,6 +61,50 @@ body {
     border-radius: 10px;
     padding: 20px;
   }
+  .parent-container {
+    display: flex; /* フレックスボックスを使用 */
+    justify-content: center; /* 水平方向の中央揃え */
+    align-items: center; /* 垂直方向の中央揃え */
+  }
+  
+  .triangle-container {
+    display: flex; /* フレックスボックスを使用 */
+    justify-content: center; /* 要素を中央に配置 */
+    align-items: center; /* 要素を中央に配置 */
+    gap: 200px; /* 各要素間に20pxの隙間を設定 */
+    margin-left: 200px; 
+  }
+  
+  h3 {
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+    margin: 0; /* 余白をリセット */
+    padding: 10px; /* パディングを設定 */
+    background-color: #f0f0f0; /* 背景色を設定 */
+    border-radius: 5px; /* 角を丸くする */
+  }
+  
+  
+  .Box {
+    position: fixed;
+    bottom: 100px;
+    right: 100px;
+    display: flex;
+    align-items: center; /* 垂直方向の中央揃え */
+    background-color: #f0f0f0; /* 背景色を設定 */
+    border: 1px solid #ccc; /* ボーダーを追加 */
+    padding: 10px; /* 内側の余白を追加 */
+    border-radius: 5px; /* 角を丸める */
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* ボックスシャドウ */
+  }
+  
+  .Box button {
+    margin: 0 10px; /* ボタン間のスペース */
+  }
+  
+  
+  
   
   /* テキストのスタイル */
   text {
