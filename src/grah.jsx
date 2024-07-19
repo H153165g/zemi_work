@@ -196,6 +196,7 @@ function detail() {
             <option value={3}>秋</option>
             <option value={4}>冬</option>
         </select>
+        
       </div>
       <svg width={width - 355} height={height}>
         {sortData.filter((a)=>{
