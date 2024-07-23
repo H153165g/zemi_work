@@ -309,7 +309,7 @@ function detail() {
       <div>
         <h1>{anime}</h1>
 
-          <h1>{yearselect}</h1>
+          <h1>{yearselect}時点の増加量</h1>
           <div className="container">
   
   

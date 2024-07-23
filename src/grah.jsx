@@ -131,7 +131,7 @@ function detail() {
   };
   const Y=()=>{
     let yearr=[]
-    for(let i=2014;i<2025;i++){
+    for(let i=2014;i<2017;i++){
         yearr.push(i)
     }
     return (
@@ -168,23 +168,37 @@ function detail() {
     setC(c + 1);
     setyear(years[counttt]);
   }
+
+  let data=sortData.filter((a)=>{
+    if(year!="-" && seasons!="-"){
+        return(a["year"]==year && a["n"]==seasons)
+    } else if(year!="-"){
+        return(a["year"]==year)
+    } else if(seasons!="-"){
+        return(a["n"]==seasons)
+    } else {
+        return(a)
+    }     
+})
   
 
   return (
     <div style={{ position: "relative" }}>
-      <h1>Anime and Video Data</h1>
+      <h1>Youtubeにおけるアニメの話題性の推移</h1>
       <div className="Box">
         <button onClick={(e) => Season(false)}>befo</button>
         <h3>{yearsnext}</h3>
         <button onClick={(e) => Season(true)}>next</button>
       </div>
       <div>
+        
         <select onChange={(e) => setSelect(e.target.value)}>
           <option value="viewCount">View Count</option>
           <option value="likeCount">Like Count</option>
           <option value="commentCount">Comment Count</option>
           <option value="videoCount">Video Count</option>
         </select>
+        <h3>アニメ放送時期</h3>
         <select onChange={(e)=>setYear(e.target.value)}>
             <option value="-">All</option>
             {Y()}
@@ -198,18 +212,8 @@ function detail() {
         </select>
         
       </div>
-      <svg width={width - 355} height={height}>
-        {sortData.filter((a)=>{
-            if(year!="-" && seasons!="-"){
-                return(a["year"]==year && a["n"]==seasons)
-            } else if(year!="-"){
-                return(a["year"]==year)
-            } else if(seasons!="-"){
-                return(a["n"]==seasons)
-            } else {
-                return(a)
-            }     
-        }).map((item, i) => (
+      <svg width={width - 355} height={(data.length+1)*20}>
+        {data.map((item, i) => (
           <g key={i} transform={`translate(0, ${20 * i + 20})`} transition="margin-right 4s" onClick={(e) => g(item["name"])}>
             <rect
               x="0"
