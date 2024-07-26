@@ -83,14 +83,16 @@ function detail() {
         const videomonth = videodateT[0].split("-");
         let videoyear = videomonth[0] + "-";
 
-        if (4 <= videomonth[1] && videomonth[1] <= 6) {
+        if (3 <= videomonth[1] && videomonth[1] < 6) {
           videoyear += "春";
-        } else if (7 <= videomonth[1] && videomonth[1] <= 9) {
+        } else if (6 <= videomonth[1] && videomonth[1] < 9) {
           videoyear += "夏";
-        } else if (10 <= videomonth[1] && videomonth[1] <= 12) {
+        } else if (9 <= videomonth[1] && videomonth[1] < 12) {
           videoyear += "秋";
-        } else {
+        } else if(12==videomonth[1]){
           videoyear += "冬";
+        } else{
+          videoyear=String(Number(videomonth[0])-1)+"-冬"
         }
 
 
