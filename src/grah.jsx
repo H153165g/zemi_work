@@ -188,46 +188,55 @@ function detail() {
     <div style={{ position: "relative" }}>
       <h1>Youtubeにおけるアニメの話題性の推移</h1>
       <div className="Box">
-        <button onClick={(e) => Season(false)}>befo</button>
+        <button onClick={(e) => Season(false)}>前</button>
         <div className="sel">
         <h3>{yearsnext} 時点</h3>
-        <select onChange={(e) => setSelect(e.target.value)}>
+        <select style={{display: "block", margin: "10px auto", padding: "10px 15px"}}onChange={(e) => setSelect(e.target.value)}>
           <option value="viewCount">総視聴回数</option>
           <option value="likeCount">総いいね数</option>
           <option value="commentCount">総コメント数</option>
           <option value="videoCount">総動画数</option>
         </select>
         </div>
-        <button onClick={(e) => Season(true)}>next</button>
+        <button onClick={(e) => Season(true)}>後</button>
         
       </div>
       
       <div>
         
         
-        <h3>アニメ放送時期</h3>
-        <select onChange={(e)=>setYear(e.target.value)}>
-            <option value="-">All</option>
+        <h3>放送時期</h3>
+        <div style={{display:"flex",justifyContent:"center"}}>
+        <label for="tosi">年度</label>
+        <select name="tosi" onChange={(e)=>setYear(e.target.value)}>
+            
+            <option value="-">全年度</option>
             {Y()}
         </select>
-        <select onChange={(e)=>setseason(e.target.value)}>
-            <option value="-">All</option>
-            <option value={1}>春</option>
-            <option value={2}>夏</option>
-            <option value={3}>秋</option>
-            <option value={4}>冬</option>
+        </div>
+        <div　style={{display:"flex",justifyContent:"center"}}>
+        <label for="kisetu">季節</label>
+        <select name="kisetu" onChange={(e)=>setseason(e.target.value)}>
+            <option value="-">全期</option>
+            <option value={1}>春季</option>
+            <option value={2}>夏季</option>
+            <option value={3}>秋季</option>
+            <option value={4}>冬季</option>
         </select>
+        
+        </div>
         
       </div>
       <svg width={width - 355} height={(data.length+1)*20}>
         {data.map((item, i) => (
-          <g key={i} transform={`translate(0, ${20 * i + 20})`} transition="margin-right 4s" onClick={(e) => g(item["name"])}>
+          <g style={{cursor: "pointer"}} key={i} transform={`translate(0, ${20 * i + 20})`} transition="margin-right 4s" onClick={(e) => g(item["name"])}>
             <rect
               x="0"
               y="0"
               width={xScale(item[select])}
               height="20"
               fill={item["color"]}
+              stroke="black"
             />
             <text
               x={xScale(item[select]) + 5}

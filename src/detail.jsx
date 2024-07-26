@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import animeData from "/data/anime.json";
 import videoData from "/data/video.json";
 import '/styles.css';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 function detail() {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
@@ -18,6 +18,7 @@ function detail() {
   const [years,setyears]=useState([])
   const color = d3.scaleOrdinal(d3.schemeCategory10);
   const [states,setstate]=useState(["videocount", "viewcount", "likecount", "comentcount"])
+  let Navigate=useNavigate()
 
   console.log()
   useEffect(() => {
@@ -245,14 +246,22 @@ function detail() {
       });
   
       return (
-        <svg width={a.length * 40 - 360} height={520}>
+        <svg width={a.length * 40 - 360} height={530}>
           <text x={0} y={15} onClick={() => clickyear(start)}>放送開始日:{start}</text>
+          <line 
+                  x1={18*years.findIndex((item)=>item==yearselect)+22}
+                  y1={20}
+                  x2={18*years.findIndex((item)=>item==yearselect)+22}
+                  y2={510}
+                  stroke="gray"
+                  stroke-dasharray="2 4"
+                 />
           {years.map((item, index) => {
             return (
               <g key={item} onClick={() => clickyear(item)}>
                 <text
                   x={18 * index +15}
-                  y="510"
+                  y="520"
                   fontSize="10"
                   strokeWidth="0"
                   fill={start !== item ? "black" : "red"}
@@ -260,6 +269,7 @@ function detail() {
                   <title>{item}</title>
                   {item.split("-")[1]}
                 </text>
+                
                 {states.map((itema,inddd) => {
                   const cyValue = selectcounts(selectanime["videodate"][item], yScales[itema], itema);
                   
@@ -274,7 +284,8 @@ function detail() {
                           stroke={color(inddd)}
                         />
                       )}
-                      <circle cx={18 * index+22 } cy={cyValue} r={5} fill={item === yearselect ? "black" : color(inddd)}>
+                      
+                      <circle cx={18 * index+22 } cy={cyValue} r={item===yearselect?8:5} fill={color(inddd)} style={{cursor:"pointer" ,filter: item===yearselect?"brightness(1)":"brightness(1.7)"}}>
                         <title>{selectanime["videodate"][item] === undefined ? 0 : selectanime["videodate"][item][itema]}</title>
                       </circle>
                       </>
@@ -309,19 +320,26 @@ function detail() {
 
     return (
       <div>
-        <h1>{anime}</h1>
-
+        <div style={{display: "flex",justifyContent: "space-between"}}>
+        
+        <button onClick={()=>Navigate(-1)}>{"<"} 戻る</button>
+      
+        <h1 style={{}}>{anime}</h1>
+        <button style={{color:"transparent",backgroundColor:"transparent",cursor:"default"}}>{"<"} 戻る</button>
+        </div>
+        <div style={{justifyContent:"center"}}>
           <h1>{yearselect}時点の増加量</h1>
+          </div>
           <div className="container">
   
   
           <div className="ranking">
       <div className="parent-container">
         <div className="triangle-container">
-          <h3 style={states.findIndex((A)=>A=="videocount")!=-1?{color:color(states.findIndex((A)=>A=="videocount"))}:{color:"black"}} onClick={(e)=>Bool("videocount")}>動画 <br />第{videorank}位</h3>
-          <h3 style={states.findIndex((A)=>A=="viewcount")!=-1?{color:color(states.findIndex((A)=>A=="viewcount"))}:{color:"black"}} onClick={(e)=>Bool("viewcount")}>視聴回数  <br />第{viewrank}位</h3>
-          <h3 style={states.findIndex((A)=>A=="likecount")!=-1?{color:color(states.findIndex((A)=>A=="likecount"))}:{color:"black"}} onClick={(e)=>Bool("likecount")}>いいね <br />第{likerank}位</h3>
-          <h3 style={states.findIndex((A)=>A=="comentcount")!=-1?{color:color(states.findIndex((A)=>A=="comentcount"))}:{color:"black"}} onClick={(e)=>Bool("comentcount")}>コメント <br />第{commentrank}位</h3>
+          <h3 style={states.findIndex((A)=>A=="videocount")!=-1?{color:color(states.findIndex((A)=>A=="videocount")), cursor:"pointer"}:{color:"black", cursor:"pointer"}} onClick={(e)=>Bool("videocount")}>動画 <br />第{videorank}位</h3>
+          <h3 style={states.findIndex((A)=>A=="viewcount")!=-1?{color:color(states.findIndex((A)=>A=="viewcount")), cursor:"pointer"}:{color:"black",cursor:"pointer"}} onClick={(e)=>Bool("viewcount")}>視聴回数  <br />第{viewrank}位</h3>
+          <h3 style={states.findIndex((A)=>A=="likecount")!=-1?{color:color(states.findIndex((A)=>A=="likecount")), cursor:"pointer"}:{color:"black",cursor:"pointer"}} onClick={(e)=>Bool("likecount")}>いいね <br />第{likerank}位</h3>
+          <h3 style={states.findIndex((A)=>A=="comentcount")!=-1?{color:color(states.findIndex((A)=>A=="comentcount")), cursor:"pointer"}:{color:"black",cursor:"pointer"}} onClick={(e)=>Bool("comentcount")}>コメント <br />第{commentrank}位</h3>
         </div>
       </div>
     </div>
