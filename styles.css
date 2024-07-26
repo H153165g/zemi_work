@@ -3,7 +3,7 @@
 /* 全般のスタイル */
 body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    background-color: #f0f2f5;
+    background-color: #f0f0f0;
     margin: 0;
     padding: 0;
   }
@@ -102,9 +102,15 @@ body {
   .Box button {
     margin: 0 10px; /* ボタン間のスペース */
   }
-  
-  
-  
+  .Box select{
+    text-align: center;
+    background-color: #f0f0f0;
+    font-size: larger;
+    font-weight: 600;
+    color: #333;
+    font-style: inherit;
+    margin: 0; /* 余白をリセット */
+  }
   
   /* テキストのスタイル */
   text {

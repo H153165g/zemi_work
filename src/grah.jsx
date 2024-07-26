@@ -187,17 +187,22 @@ function detail() {
       <h1>Youtubeにおけるアニメの話題性の推移</h1>
       <div className="Box">
         <button onClick={(e) => Season(false)}>befo</button>
-        <h3>{yearsnext}</h3>
+        <div className="sel">
+        <h3>{yearsnext} 時点</h3>
+        <select onChange={(e) => setSelect(e.target.value)}>
+          <option value="viewCount">総視聴回数</option>
+          <option value="likeCount">総いいね数</option>
+          <option value="commentCount">総コメント数</option>
+          <option value="videoCount">総動画数</option>
+        </select>
+        </div>
         <button onClick={(e) => Season(true)}>next</button>
+        
       </div>
+      
       <div>
         
-        <select onChange={(e) => setSelect(e.target.value)}>
-          <option value="viewCount">View Count</option>
-          <option value="likeCount">Like Count</option>
-          <option value="commentCount">Comment Count</option>
-          <option value="videoCount">Video Count</option>
-        </select>
+        
         <h3>アニメ放送時期</h3>
         <select onChange={(e)=>setYear(e.target.value)}>
             <option value="-">All</option>
