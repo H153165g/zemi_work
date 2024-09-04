@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import * as d3 from "d3";
 import animeData from "/data/anime.json";
 import videoData from "/data/video.json";
@@ -17,12 +17,12 @@ function detail() {
   const [yearsnext, setyear] = useState("2006-春");
   const [year, setYear] = useState("-");
   const [seasons, setseason] = useState("-");
-  const [yearsanime, setya] = useState("");
-  const [countdata, setCount] = useState({});
   const [years, setyears] = useState([]);
   const color = d3.scaleOrdinal(d3.schemeCategory10);
+  const intervalIdRef = useRef(null);
   const [c, setC] = useState(0);
   const [All, setall] = useState(sortData);
+  const [stop, setStop] = useState(false);
 
   useEffect(() => {
     let yearcount = [];
@@ -134,6 +134,26 @@ function detail() {
     );
   }, [c, select]);
 
+  const updateData = () => {
+    const currentIndex = years.indexOf(yearsnext);
+    if (currentIndex < years.length - 1) {
+      const nextYear = years[currentIndex + 1];
+      const updatedData = sortData.map((item) => ({
+        ...item,
+        commentCount: item.commentCount + item.videodate[nextYear].comentcount,
+        likeCount: item.likeCount + item.videodate[nextYear].likecount,
+        videoCount: item.videoCount + item.videodate[nextYear].videocount,
+        viewCount: item.viewCount + item.videodate[nextYear].viewcount,
+      }));
+      setSort(updatedData);
+      setYearsNext(nextYear);
+      setC((prev) => prev + 1);
+    } else {
+      // 最後まで到達したらタイマーを停止
+      setStop(true);
+    }
+  };
+
   const xmax = sortData.length > 0 ? sortData[0][select] : 0;
   const xScale = d3
     .scaleLinear()
@@ -161,41 +181,77 @@ function detail() {
       </option>
     ));
   };
-  const Season = (g) => {
-    let updateAnime = sortData;
-    let counttt = g
-      ? years.findIndex((item) => item == yearsnext) + 1
-      : years.findIndex((item) => item == yearsnext) - 1;
-    updateAnime.map((item) => {
-      if (g) {
-        if (counttt < years.length) {
-          item["videoCount"] += item["videodate"][years[counttt]]["videocount"];
-          item["likeCount"] += item["videodate"][years[counttt]]["likecount"];
-          item["viewCount"] += item["videodate"][years[counttt]]["viewcount"];
-          item["commentCount"] +=
-            item["videodate"][years[counttt]]["comentcount"];
-        }
-      } else {
-        if (counttt >= 0) {
-          item["videoCount"] -=
-            item["videodate"][years[counttt + 1]]["videocount"];
-          item["likeCount"] -=
-            item["videodate"][years[counttt + 1]]["likecount"];
-          item["viewCount"] -=
-            item["videodate"][years[counttt + 1]]["viewcount"];
-          item["commentCount"] -=
-            item["videodate"][years[counttt + 1]]["comentcount"];
-        }
-      }
-    });
-    if (counttt == years.length) {
-      counttt -= 1;
-    } else if (counttt == -1) {
-      counttt += 1;
+  useEffect(() => {
+    if (!stop) {
+      intervalIdRef.current = setInterval(() => {
+        updateData();
+      }, 1000); // 更新間隔を適宜変更
+    } else if (intervalIdRef.current) {
+      clearInterval(intervalIdRef.current);
+      intervalIdRef.current = null;
     }
-    setC(c + 1);
-    setyear(years[counttt]);
-  };
+
+    // コンポーネントのアンマウント時にクリーンアップ
+    return () => {
+      if (intervalIdRef.current) {
+        clearInterval(intervalIdRef.current);
+      }
+    };
+  }, [stop, yearsnext, sortData]);
+  useEffect(() => {
+    const timerId = (g) => {
+      if (!stop) {
+        const updateAnime = [...sortData]; // 最新のsortDataを取得
+        let counttt =
+          g == null
+            ? years.findIndex((item) => item == yearsnext) + 1
+            : years.findIndex((item) => item == yearsnext) - 1;
+
+        updateAnime.forEach((item) => {
+          console.log(item, years[counttt]);
+          if (g === null) {
+            if (counttt < years.length) {
+              item["videoCount"] +=
+                item["videodate"][years[counttt]]["videocount"];
+              item["likeCount"] +=
+                item["videodate"][years[counttt]]["likecount"];
+              item["viewCount"] +=
+                item["videodate"][years[counttt]]["viewcount"];
+              item["commentCount"] +=
+                item["videodate"][years[counttt]]["comentcount"];
+            } else {
+              clearInterval(timerId);
+            }
+          } else {
+            if (counttt >= 0) {
+              item["videoCount"] -=
+                item["videodate"][years[counttt + 1]]["videocount"];
+              item["likeCount"] -=
+                item["videodate"][years[counttt + 1]]["likecount"];
+              item["viewCount"] -=
+                item["videodate"][years[counttt + 1]]["viewcount"];
+              item["commentCount"] -=
+                item["videodate"][years[counttt + 1]]["comentcount"];
+            }
+          }
+        });
+
+        if (counttt == years.length) {
+          counttt -= 1;
+        } else if (counttt == -1) {
+          counttt += 1;
+        }
+        setC((prevC) => prevC + 1);
+        setyear(years[counttt]);
+      }
+    };
+
+    const intervalId = setInterval(() => {
+      timerId(null);
+    }, 400);
+
+    return () => clearInterval(intervalId);
+  }, [sortData, yearsnext]); // sortDataとyearsnextが変更されるたびに最新の値を使う
 
   let data = sortData.filter((a) => {
     if (year != "-" && seasons != "-") {
@@ -213,7 +269,24 @@ function detail() {
     <div style={{ position: "relative" }}>
       <h1>Youtubeにおけるアニメの話題性の推移</h1>
       <div className="Box">
-        <button onClick={(e) => Season(false)}>前</button>
+        {stop ? (
+          <button
+            onClick={(e) => {
+              setStop(false);
+            }}
+          >
+            止
+          </button>
+        ) : (
+          <button
+            onClick={(e) => {
+              setStop(true);
+            }}
+          >
+            再
+          </button>
+        )}
+        {/* <button onClick={(e) => Season(false)}>前</button>
         <div className="sel">
           <h3>{yearsnext} 時点</h3>
           <select
@@ -230,11 +303,25 @@ function detail() {
             <option value="videoCount">総動画数</option>
           </select>
         </div>
-        <button onClick={(e) => Season(true)}>後</button>
+        <button onClick={(e) => Season(true)}>後</button> */}
       </div>
 
       <div>
-        <h3>放送時期</h3>
+        <h3>{yearsnext} 時点</h3>
+        <select
+          style={{
+            display: "block",
+            margin: "10px auto",
+            padding: "10px 15px",
+          }}
+          onChange={(e) => setSelect(e.target.value)}
+        >
+          <option value="viewCount">総視聴回数</option>
+          <option value="likeCount">総いいね数</option>
+          <option value="commentCount">総コメント数</option>
+          <option value="videoCount">総動画数</option>
+        </select>
+        {/* <h3>放送時期</h3>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <label htmlFor="tosi">年度</label>
           <select name="tosi" onChange={(e) => setYear(e.target.value)}>
@@ -251,9 +338,9 @@ function detail() {
             <option value={3}>秋季</option>
             <option value={4}>冬季</option>
           </select>
-        </div>
+        </div> */}
       </div>
-      <div style={{ height: "600px", overflowY: "scroll" }}>
+      <div style={{ height: "700px", overflowY: "scroll" }}>
         <svg width={width - 300} height={(data.length + 1) * 30}>
           {xScale.ticks().map((item, index) => (
             <g key={index}>
@@ -276,99 +363,8 @@ function detail() {
               </text>
             </g>
           ))}
-          {/* <line
-          x1="180"
-          y1="0"
-          x2="180"
-          y2={(data.length + 1) * 30}
-          stroke="black"
-        ></line> */}
           <line x1="0" y1="40" x2={width - 300} y2="40" stroke="black"></line>
-          {/* <line
-          x1={180 + (width - 355 - 180) / 5}
-          y1="30"
-          x2={180 + (width - 355 - 180) / 5}
-          y2={(data.length + 1) * 30}
-          stroke="grey"
-        ></line>
-        <text
-          textAnchor="middle"
-          x={180 + (width - 355 - 180) / 5}
-          y="20"
-          fontSize="12"
-          fill="black"
-          strokeWidth="0"
-        >
-          {((Math.floor(xmax / 100) + 1) * 100) / 5}
-        </text>
-        <line
-          x1={180 + ((width - 355 - 180) / 5) * 2}
-          y1="30"
-          x2={180 + ((width - 355 - 180) / 5) * 2}
-          y2={(data.length + 1) * 30}
-          stroke="grey"
-        ></line>
-        <text
-          textAnchor="middle"
-          x={180 + ((width - 355 - 180) / 5) * 2}
-          y="20"
-          fontSize="12"
-          fill="black"
-          strokeWidth="0"
-        >
-          {(((Math.floor(xmax / 100) + 1) * 100) / 5) * 2}
-        </text>
-        <line
-          x1={180 + ((width - 355 - 180) / 5) * 3}
-          y1="30"
-          x2={180 + ((width - 355 - 180) / 5) * 3}
-          y2={(data.length + 1) * 30}
-          stroke="grey"
-        ></line>
-        <text
-          textAnchor="middle"
-          x={180 + ((width - 355 - 180) / 5) * 3}
-          y="20"
-          fontSize="12"
-          fill="black"
-          strokeWidth="0"
-        >
-          {(((Math.floor(xmax / 100) + 1) * 100) / 5) * 3}
-        </text>
-        <line
-          x1={180 + ((width - 355 - 180) / 5) * 4}
-          y1="30"
-          x2={180 + ((width - 355 - 180) / 5) * 4}
-          y2={(data.length + 1) * 30}
-          stroke="grey"
-        ></line>
-        <text
-          textAnchor="middle"
-          x={180 + ((width - 355 - 180) / 5) * 4}
-          y="20"
-          fontSize="12"
-          fill="black"
-          strokeWidth="0"
-        >
-          {(((Math.floor(xmax / 100) + 1) * 100) / 5) * 4}
-        </text>
-        <line
-          x1={180 + (width - 355 - 180)}
-          y1="30"
-          x2={180 + (width - 355 - 180)}
-          y2={(data.length + 1) * 30}
-          stroke="grey"
-        ></line>
-        <text
-          textAnchor="middle"
-          x={180 + (width - 355 - 180)}
-          y="20"
-          fontSize="12"
-          fill="black"
-          strokeWidth="0"
-        >
-          {(Math.floor(xmax / 100) + 1) * 100}
-        </text> */}
+
           {data.map((item, i) => (
             <g
               style={{ cursor: "pointer" }}
