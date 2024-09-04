@@ -75,7 +75,7 @@ svg {
   display: flex; /* フレックスボックスを使用 */
   justify-content: space-between; /* 要素を中央に配置 */
   align-items: center; /* 要素を中央に配置 */
-  gap: 200px; /* 各要素間に20pxの隙間を設定 */
+  gap: 250px; /* 各要素間に20pxの隙間を設定 */
   margin-left: 200px;
 }
 
@@ -165,7 +165,8 @@ g:hover text {
   margin: 20px 0;
 }
 
-.ranking-container h2 {
+.ranking-container h3 {
+  text-align: center;
   margin-top: 20px;
   font-size: 1.5rem;
   color: #2c3e50;

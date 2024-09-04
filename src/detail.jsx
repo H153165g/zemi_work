@@ -18,12 +18,25 @@ function detail() {
   const [height, setHeight] = useState();
   const [years, setyears] = useState([]);
   const color = d3.scaleOrdinal(d3.schemeCategory10);
+
   const [states, setstate] = useState([
     "videocount",
     "viewcount",
     "likecount",
     "comentcount",
   ]);
+  const name = {
+    videocount: "動画",
+    viewcount: "視聴回数",
+    likecount: "いいね",
+    comentcount: "コメント",
+  };
+  const statescolor = {
+    videocount: "blue",
+    viewcount: "orange",
+    likecount: "green",
+    comentcount: "red",
+  };
   let Navigate = useNavigate();
   const handleMouseMove = (e) => {
     // SVG要素内の座標を取得
@@ -144,6 +157,10 @@ function detail() {
   const [commentrank, setcomment] = useState("ビリ");
   const [selectanime, setAn] = useState(itemName);
   const [selectcount, setselectC] = useState("videocount");
+  let kurai = "";
+  if (states.length != 1) {
+    kurai = "";
+  }
   useEffect(() => {
     const animedata = sortData.filter(
       (an) => an["videodate"][yearselect] != null
@@ -331,27 +348,37 @@ function detail() {
             stroke-dasharray="2 4"
           />
           {states.length == 1 &&
-            yScales[states[0]].ticks().map((item, index) => (
-              <g key={index}>
-                <line
-                  x1={10 + 60}
-                  x2={20 + 60}
-                  y1={500 - yScales[states[0]](item)}
-                  y2={500 - yScales[states[0]](item)}
-                  stroke="grey"
-                ></line>
-                <text
-                  textAnchor="end"
-                  x="65"
-                  y={500 - yScales[states[0]](item) + 5}
-                  fontSize="12"
-                  fill="black"
-                  strokeWidth="0"
-                >
-                  {item}
-                </text>
-              </g>
-            ))}
+            yScales[states[0]].ticks().map((item, index) => {
+              let count = 1;
+              if (states[0] == "viewcount" || states[0] == "likecount") {
+                count *= 10000;
+                kurai = "(万)";
+              } else if (states[0] == "comentcount") {
+                count *= 100;
+                kurai = "(百)";
+              }
+              return (
+                <g key={index}>
+                  <line
+                    x1={10 + 60}
+                    x2={20 + 60}
+                    y1={500 - yScales[states[0]](item)}
+                    y2={500 - yScales[states[0]](item)}
+                    stroke="grey"
+                  ></line>
+                  <text
+                    textAnchor="end"
+                    x="65"
+                    y={500 - yScales[states[0]](item) + 5}
+                    fontSize="12"
+                    fill="black"
+                    strokeWidth="0"
+                  >
+                    {item / count}
+                  </text>
+                </g>
+              );
+            })}
 
           {years.map((item, index) => {
             return (
@@ -389,7 +416,7 @@ function detail() {
                             yScales[itema],
                             itema
                           )}
-                          stroke={color(inddd)}
+                          stroke={statescolor[itema]}
                         />
                       )}
 
@@ -397,13 +424,9 @@ function detail() {
                         cx={18 * index + 22 + 60}
                         cy={cyValue}
                         r={item === yearselect ? 8 : 5}
-                        fill={color(inddd)}
+                        fill={statescolor[itema]}
                         style={{
                           cursor: "pointer",
-                          filter:
-                            item === yearselect
-                              ? "brightness(1)"
-                              : "brightness(1.7)",
                         }}
                         onClick={(e) => {
                           setstate([itema]);
@@ -422,24 +445,52 @@ function detail() {
             );
           })}
 
-          <rect
-            x={mousePosition["x"] + 10}
-            y={mousePosition["y"]}
-            width={"150"}
-            height="150"
-            fill="#a0d8ef"
-            rx="15"
-            opacity={0.5}
-          />
-          <text
-            x={mousePosition["x"] + 10 + 10}
-            y={mousePosition["y"] + 30}
-            opacity={0.5}
-          >
-            {years[Math.round((mousePosition["x"] - 22 - 60) / 18)]}
-          </text>
+          {years.findIndex((item) => yearselect == item) < 68 ? (
+            <>
+              <rect
+                x={mousePosition["x"] + 10}
+                y={mousePosition["y"]}
+                width={"150"}
+                height="130"
+                fill="white"
+                stroke="black"
+                rx="15"
+              />
+              <text
+                x={mousePosition["x"] + 10 + 10}
+                y={mousePosition["y"] + 30}
+              >
+                {years[Math.round((mousePosition["x"] - 22 - 60) / 18)]}
+              </text>
+            </>
+          ) : (
+            <>
+              <rect
+                x={mousePosition["x"] - 150}
+                y={mousePosition["y"]}
+                width={"150"}
+                height="130"
+                fill="white"
+                stroke="black"
+                rx="15"
+              />
+              <text
+                x={mousePosition["x"] + 10 + 10 - 150}
+                y={mousePosition["y"] + 30}
+              >
+                {years[Math.round((mousePosition["x"] - 22 - 60) / 18)]}
+              </text>
+            </>
+          )}
+
           <text x={87} y={540}>
             2006年
+          </text>
+          <text x={width - 370} y={540}>
+            2024年
+          </text>
+          <text x={10} y={20}>
+            {kurai}
           </text>
           {states.map((itema, index) => {
             if (Math.round((mousePosition["x"] - 22 - 60) / 18) <= -1) {
@@ -454,13 +505,25 @@ function detail() {
               itema
             );
             console.log(Math.round((mousePosition["x"] - 22 - 60) / 18));
-            return (
+            return years.findIndex((item) => yearselect == item) < 68 ? (
               <text
                 x={mousePosition["x"] + 10 + 10}
                 y={mousePosition["y"] + index * 20 + 50}
-                opacity={0.5}
               >
-                {itema} :
+                {name[itema]} :
+                {(mousePosition["x"] - 22 - 60) / 18 >= 0 &&
+                (mousePosition["x"] - 22 - 60) / 18 < years.length - 1
+                  ? selectanime["videodate"][
+                      years[Math.round((mousePosition["x"] - 22 - 60) / 18)]
+                    ][itema]
+                  : selectanime["videodate"][years[0]][itema]}
+              </text>
+            ) : (
+              <text
+                x={mousePosition["x"] + 10 + 10 - 150}
+                y={mousePosition["y"] + index * 20 + 50}
+              >
+                {name[itema]} :
                 {(mousePosition["x"] - 22 - 60) / 18 >= 0 &&
                 (mousePosition["x"] - 22 - 60) / 18 < years.length - 1
                   ? selectanime["videodate"][
@@ -490,7 +553,16 @@ function detail() {
     return (
       <div>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <button onClick={() => Navigate(-1)}>{"<"} 戻る</button>
+          <button
+            style={{
+              color: "transparent",
+              backgroundColor: "transparent",
+              cursor: "default",
+            }}
+            onClick={() => Navigate(-1)}
+          >
+            {"<"} 戻る
+          </button>
 
           <h1 style={{}}>{anime}</h1>
           <button
@@ -514,9 +586,7 @@ function detail() {
                   style={
                     states.findIndex((A) => A == "videocount") != -1
                       ? {
-                          color: color(
-                            states.findIndex((A) => A == "videocount")
-                          ),
+                          color: statescolor["videocount"],
                           cursor: "pointer",
                         }
                       : { color: "black", cursor: "pointer" }
@@ -529,9 +599,7 @@ function detail() {
                   style={
                     states.findIndex((A) => A == "viewcount") != -1
                       ? {
-                          color: color(
-                            states.findIndex((A) => A == "viewcount")
-                          ),
+                          color: statescolor["viewcount"],
                           cursor: "pointer",
                         }
                       : { color: "black", cursor: "pointer" }
@@ -544,9 +612,7 @@ function detail() {
                   style={
                     states.findIndex((A) => A == "likecount") != -1
                       ? {
-                          color: color(
-                            states.findIndex((A) => A == "likecount")
-                          ),
+                          color: statescolor["likecount"],
                           cursor: "pointer",
                         }
                       : { color: "black", cursor: "pointer" }
@@ -559,9 +625,7 @@ function detail() {
                   style={
                     states.findIndex((A) => A == "comentcount") != -1
                       ? {
-                          color: color(
-                            states.findIndex((A) => A == "comentcount")
-                          ),
+                          color: statescolor["comentcount"],
                           cursor: "pointer",
                         }
                       : { color: "black", cursor: "pointer" }
@@ -585,6 +649,16 @@ function detail() {
             リセット
           </button>
         )}
+        <img
+          src="/data/cancel.png"
+          onClick={() => Navigate(-1)}
+          style={{
+            cursor: "pointer",
+            position: "fixed",
+            top: "10px",
+            right: "10px",
+          }}
+        />
       </div>
     );
   };

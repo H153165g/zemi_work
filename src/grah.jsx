@@ -24,6 +24,7 @@ function detail() {
   const [c, setC] = useState(0);
   const [All, setall] = useState(sortData);
   const [stop, setStop] = useState(false);
+  let kurai = "";
 
   const handleSliderChange = (e) => {
     setZanzo(false);
@@ -265,7 +266,8 @@ function detail() {
       <h1>Youtubeにおけるアニメの話題性の推移</h1>
 
       <div className="Box">
-        <div className="slider-container">
+        <p>2006-春</p>
+        <div style={{ textAlign: "center" }}>
           {stop ? (
             <img
               src="/data/start.png"
@@ -283,7 +285,22 @@ function detail() {
               style={{ cursor: "pointer" }}
             />
           )}
+          <input
+            type="range"
+            min="0"
+            max={years.length - 1}
+            value={years.findIndex((item) => item === yearsnext)}
+            onChange={handleSliderChange}
+            style={{
+              width: "300px",
+              display: "block",
+              margin: "0 auto",
+            }}
+          />
+          <p>year:{yearsnext}</p>
         </div>
+        <p>2024-冬</p>
+        <div className="slider-container"></div>
         {/* <button onClick={(e) => Season(false)}>前</button>
         <div className="sel">
           <h3>{yearsnext} 時点</h3>
@@ -306,20 +323,6 @@ function detail() {
 
       <div>
         <h3>{yearsnext} 時点</h3>
-        <div style={{ textAlign: "center" }}>
-          <input
-            type="range"
-            min="0"
-            max={years.length - 1}
-            value={years.findIndex((item) => item === yearsnext)}
-            onChange={handleSliderChange}
-            style={{
-              width: "300px",
-              display: "block",
-              margin: "0 auto",
-            }}
-          />
-        </div>
 
         <select
           style={{
@@ -355,27 +358,38 @@ function detail() {
       </div>
       <div style={{ height: "700px", overflowY: "scroll" }}>
         <svg width={width - 300} height={(data.length + 1) * 30}>
-          {xScale.ticks().map((item, index) => (
-            <g key={index}>
-              <line
-                x1={xScale(item) + 180}
-                x2={xScale(item) + 180}
-                y1={30}
-                y2={(data.length + 1) * 30}
-                stroke="grey"
-              ></line>
-              <text
-                textAnchor="middle"
-                x={xScale(item) + 180}
-                y="20"
-                fontSize="12"
-                fill="black"
-                strokeWidth="0"
-              >
-                {item / 10000}
-              </text>
-            </g>
-          ))}
+          {xScale.ticks().map((item, index) => {
+            let count = 1;
+            console.log(select);
+            if (select == "viewCount" || select == "likeCount") {
+              count *= 10000;
+              kurai = "(万)";
+            } else if (select == "commentCount") {
+              count *= 100;
+              kurai = "(百)";
+            }
+            return (
+              <g key={index}>
+                <line
+                  x1={xScale(item) + 180}
+                  x2={xScale(item) + 180}
+                  y1={30}
+                  y2={(data.length + 1) * 30}
+                  stroke="grey"
+                ></line>
+                <text
+                  textAnchor="middle"
+                  x={xScale(item) + 180}
+                  y="20"
+                  fontSize="12"
+                  fill="black"
+                  strokeWidth="0"
+                >
+                  {item / count}
+                </text>
+              </g>
+            );
+          })}
           <line x1="0" y1="40" x2={width - 300} y2="40" stroke="black"></line>
 
           {zanzo ? (
@@ -424,7 +438,7 @@ function detail() {
             fill="black"
             strokeWidth="0"
           >
-            {"（万）"}
+            {kurai}
           </text>
         </svg>
       </div>
