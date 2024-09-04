@@ -14,7 +14,7 @@ function detail() {
   const [animedata, setadata] = useState([]);
   const [width, setWidth] = useState(1750);
   const [height, setHeight] = useState();
-  const [yearsnext, setyear] = useState("2006-春");
+  const [yearsnext, setYearsNext] = useState("2006-春");
   const [year, setYear] = useState("-");
   const [seasons, setseason] = useState("-");
   const [years, setyears] = useState([]);
@@ -23,6 +23,10 @@ function detail() {
   const [c, setC] = useState(0);
   const [All, setall] = useState(sortData);
   const [stop, setStop] = useState(false);
+
+  const handleSliderChange = (e) => {
+    dataset(e.target.value);
+  };
 
   useEffect(() => {
     let yearcount = [];
@@ -84,7 +88,7 @@ function detail() {
     setadata(animedatas);
     setHeight(animedatas.length * 20 + 20);
 
-    videoData["videos"].forEach((video) => {
+    videoData["videos"].forEach((video, i) => {
       const anime = updatedAnimeData.find(
         (anime) => anime.name === video["animename"]
       );
@@ -117,13 +121,19 @@ function detail() {
         );
       }
     });
-
-    updatedAnimeData.map((item) => {
-      item["commentCount"] = item["videodate"][yearsnext]["comentcount"];
-      item["likeCount"] = item["videodate"][yearsnext]["likecount"];
-      item["videoCount"] = item["videodate"][yearsnext]["videocount"];
-      item["viewCount"] = item["videodate"][yearsnext]["viewcount"];
+    updatedAnimeData.map((anime) => {
+      for (let i = 1; i < yearcount.length; i++) {
+        anime["videodate"][yearcount[i]]["videocount"] +=
+          anime["videodate"][yearcount[i - 1]]["videocount"];
+        anime["videodate"][yearcount[i]]["viewcount"] +=
+          anime["videodate"][yearcount[i - 1]]["viewcount"];
+        anime["videodate"][yearcount[i]]["likecount"] +=
+          anime["videodate"][yearcount[i - 1]]["likecount"];
+        anime["videodate"][yearcount[i]]["commentcount"] +=
+          anime["videodate"][yearcount[i - 1]]["commentcount"];
+      }
     });
+
     setSort(updatedAnimeData);
     setall(updatedAnimeData);
   }, []);
@@ -146,6 +156,7 @@ function detail() {
         viewCount: item.viewCount + item.videodate[nextYear].viewcount,
       }));
       setSort(updatedData);
+      console.log("nextYear", nextYear);
       setYearsNext(nextYear);
       setC((prev) => prev + 1);
     } else {
@@ -198,51 +209,31 @@ function detail() {
       }
     };
   }, [stop, yearsnext, sortData]);
+
+  const dataset = (counttt) => {
+    const updateAnime = [...sortData]; // 最新のsortDataを取得
+    updateAnime.forEach((item) => {
+      if (counttt < years.length) {
+        item["videoCount"] = item["videodate"][years[counttt]]["videocount"];
+        item["likeCount"] = item["videodate"][years[counttt]]["likecount"];
+        item["viewCount"] = item["videodate"][years[counttt]]["viewcount"];
+        item["commentCount"] = item["videodate"][years[counttt]]["comentcount"];
+      }
+    });
+    console.log(c);
+    setC((prevC) => prevC + 1);
+    console.log("years[counttt]", years[counttt]);
+    setYearsNext(years[counttt]);
+  };
+
   useEffect(() => {
     const timerId = (g) => {
       if (!stop) {
-        const updateAnime = [...sortData]; // 最新のsortDataを取得
         let counttt =
           g == null
             ? years.findIndex((item) => item == yearsnext) + 1
             : years.findIndex((item) => item == yearsnext) - 1;
-
-        updateAnime.forEach((item) => {
-          console.log(item, years[counttt]);
-          if (g === null) {
-            if (counttt < years.length) {
-              item["videoCount"] +=
-                item["videodate"][years[counttt]]["videocount"];
-              item["likeCount"] +=
-                item["videodate"][years[counttt]]["likecount"];
-              item["viewCount"] +=
-                item["videodate"][years[counttt]]["viewcount"];
-              item["commentCount"] +=
-                item["videodate"][years[counttt]]["comentcount"];
-            } else {
-              clearInterval(timerId);
-            }
-          } else {
-            if (counttt >= 0) {
-              item["videoCount"] -=
-                item["videodate"][years[counttt + 1]]["videocount"];
-              item["likeCount"] -=
-                item["videodate"][years[counttt + 1]]["likecount"];
-              item["viewCount"] -=
-                item["videodate"][years[counttt + 1]]["viewcount"];
-              item["commentCount"] -=
-                item["videodate"][years[counttt + 1]]["comentcount"];
-            }
-          }
-        });
-
-        if (counttt == years.length) {
-          counttt -= 1;
-        } else if (counttt == -1) {
-          counttt += 1;
-        }
-        setC((prevC) => prevC + 1);
-        setyear(years[counttt]);
+        dataset(counttt);
       }
     };
 
@@ -286,6 +277,17 @@ function detail() {
             再
           </button>
         )}
+        <div className="slider-container">
+          <input
+            type="range"
+            min="0"
+            max={years.length - 1}
+            value={years.findIndex((item) => item === yearsnext)}
+            onChange={handleSliderChange}
+            style={{ width: "300px" }}
+          />
+          <p>Year: {yearsnext}</p>
+        </div>
         {/* <button onClick={(e) => Season(false)}>前</button>
         <div className="sel">
           <h3>{yearsnext} 時点</h3>
