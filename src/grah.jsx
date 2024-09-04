@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 function detail() {
   let navigate = useNavigate();
+  const [zanzo, setZanzo] = useState(true);
   const [select, setSelect] = useState("viewCount");
   const [sortData, setSort] = useState([]);
   const [draw, setDraw] = useState(0);
@@ -25,9 +26,11 @@ function detail() {
   const [stop, setStop] = useState(false);
 
   const handleSliderChange = (e) => {
+    setZanzo(false);
     dataset(e.target.value);
   };
 
+  console.log(sortData);
   useEffect(() => {
     let yearcount = [];
     for (let i = 2006; i < 2025; i++) {
@@ -129,8 +132,8 @@ function detail() {
           anime["videodate"][yearcount[i - 1]]["viewcount"];
         anime["videodate"][yearcount[i]]["likecount"] +=
           anime["videodate"][yearcount[i - 1]]["likecount"];
-        anime["videodate"][yearcount[i]]["commentcount"] +=
-          anime["videodate"][yearcount[i - 1]]["commentcount"];
+        anime["videodate"][yearcount[i]]["comentcount"] +=
+          anime["videodate"][yearcount[i - 1]]["comentcount"];
       }
     });
 
@@ -142,6 +145,7 @@ function detail() {
     setSort((prevSortData) =>
       [...prevSortData].sort((a, b) => b[select] - a[select])
     );
+    setZanzo(true);
   }, [c, select]);
 
   const updateData = () => {
@@ -361,46 +365,50 @@ function detail() {
                 fill="black"
                 strokeWidth="0"
               >
-                {item}
+                {item / 10000}
               </text>
             </g>
           ))}
           <line x1="0" y1="40" x2={width - 300} y2="40" stroke="black"></line>
 
-          {data.map((item, i) => (
-            <g
-              style={{ cursor: "pointer" }}
-              key={i}
-              transform={`translate(0, ${30 * (i + 1) + 20})`}
-              transition="margin-right 4s"
-              onClick={(e) => g(item["name"])}
-            >
-              <rect
-                x="180"
-                y="0"
-                width={xScale(item[select])}
-                height="20"
-                fill={item["color"]}
-                stroke="black"
-              />
-              <text
-                textAnchor="end"
-                x="170"
-                y="15"
-                fontSize="12"
-                fill="black"
-                strokeWidth="0"
+          {zanzo ? (
+            data.map((item, i) => (
+              <g
+                style={{ cursor: "pointer" }}
+                key={i}
+                transform={`translate(0, ${30 * (i + 1) + 20})`}
+                transition="margin-right 4s"
+                onClick={(e) => g(item["name"])}
               >
-                {Array.from(
-                  item["shortname"] == "" ? item["name"] : item["shortname"]
-                ).map((n, index) => {
-                  if (index < 12) {
-                    return n;
-                  }
-                })}
-              </text>
-            </g>
-          ))}
+                <rect
+                  x="180"
+                  y="0"
+                  width={xScale(item[select])}
+                  height="20"
+                  fill="blue"
+                  stroke="black"
+                />
+                <text
+                  textAnchor="end"
+                  x="170"
+                  y="15"
+                  fontSize="12"
+                  fill="black"
+                  strokeWidth="0"
+                >
+                  {Array.from(
+                    item["shortname"] == "" ? item["name"] : item["shortname"]
+                  ).map((n, index) => {
+                    if (index < 12) {
+                      return n;
+                    }
+                  })}
+                </text>
+              </g>
+            ))
+          ) : (
+            <></>
+          )}
         </svg>
       </div>
     </div>
