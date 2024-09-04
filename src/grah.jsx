@@ -385,7 +385,7 @@ function detail() {
                   y="0"
                   width={xScale(item[select])}
                   height="20"
-                  fill="blue"
+                  fill="#3498db"
                   stroke="black"
                 />
                 <text
@@ -409,6 +409,16 @@ function detail() {
           ) : (
             <></>
           )}
+          <text
+            textAnchor="end"
+            x={width - 310}
+            y="20"
+            fontSize="12"
+            fill="black"
+            strokeWidth="0"
+          >
+            {"（万）"}
+          </text>
         </svg>
       </div>
     </div>

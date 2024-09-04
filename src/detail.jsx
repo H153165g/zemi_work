@@ -8,6 +8,7 @@ function detail() {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const itemName = query.get("name");
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [select, setSelect] = useState("viewCount");
   const [sortData, setSort] = useState([]);
   const [draw, setDraw] = useState(0);
@@ -24,7 +25,15 @@ function detail() {
     "comentcount",
   ]);
   let Navigate = useNavigate();
-
+  const handleMouseMove = (e) => {
+    // SVG要素内の座標を取得
+    const svg = e.target;
+    const point = svg.createSVGPoint();
+    point.x = e.clientX;
+    point.y = e.clientY;
+    const cursorPoint = point.matrixTransform(svg.getScreenCTM().inverse());
+    setMousePosition({ x: cursorPoint.x, y: cursorPoint.y });
+  };
   console.log();
   useEffect(() => {
     let yearcount = [];
@@ -273,21 +282,34 @@ function detail() {
       });
 
       return (
-        <svg width={a.length * 40 - 360} height={530}>
-          <text x={0} y={15} onClick={() => clickyear(start)}>
+        <svg
+          width={a.length * 40 - 360}
+          height={530}
+          onMouseMove={handleMouseMove}
+        >
+          <line x1="10" x2="10" y1="0" y2="500" stroke="black"></line>
+          <line
+            x1="10"
+            x2={a.length * 40 - 360}
+            y1="500"
+            y2="500"
+            stroke="black"
+          ></line>
+          <text x={20} y={15} onClick={() => clickyear(start)}>
             放送開始日:{start}
           </text>
+
           <line
-            x1={18 * years.findIndex((item) => item == yearselect) + 22}
+            x1={Math.round((mousePosition["x"] - 22) / 18) * 18 + 22}
             y1={20}
-            x2={18 * years.findIndex((item) => item == yearselect) + 22}
+            x2={Math.round((mousePosition["x"] - 22) / 18) * 18 + 22}
             y2={510}
             stroke="gray"
             stroke-dasharray="2 4"
           />
           {years.map((item, index) => {
             return (
-              <g key={item} onClick={() => clickyear(item)}>
+              <g key={item}>
                 <text
                   x={18 * index + 15}
                   y="520"
