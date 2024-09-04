@@ -263,34 +263,26 @@ function detail() {
   return (
     <div style={{ position: "relative" }}>
       <h1>Youtubeにおけるアニメの話題性の推移</h1>
+
       <div className="Box">
-        {stop ? (
-          <button
-            onClick={(e) => {
-              setStop(false);
-            }}
-          >
-            止
-          </button>
-        ) : (
-          <button
-            onClick={(e) => {
-              setStop(true);
-            }}
-          >
-            再
-          </button>
-        )}
         <div className="slider-container">
-          <input
-            type="range"
-            min="0"
-            max={years.length - 1}
-            value={years.findIndex((item) => item === yearsnext)}
-            onChange={handleSliderChange}
-            style={{ width: "300px" }}
-          />
-          <p>Year: {yearsnext}</p>
+          {stop ? (
+            <img
+              src="/data/start.png"
+              onClick={(e) => {
+                setStop(false);
+              }}
+              style={{ cursor: "pointer" }}
+            />
+          ) : (
+            <img
+              src="/data/stop.png"
+              onClick={(e) => {
+                setStop(true);
+              }}
+              style={{ cursor: "pointer" }}
+            />
+          )}
         </div>
         {/* <button onClick={(e) => Season(false)}>前</button>
         <div className="sel">
@@ -314,6 +306,21 @@ function detail() {
 
       <div>
         <h3>{yearsnext} 時点</h3>
+        <div style={{ textAlign: "center" }}>
+          <input
+            type="range"
+            min="0"
+            max={years.length - 1}
+            value={years.findIndex((item) => item === yearsnext)}
+            onChange={handleSliderChange}
+            style={{
+              width: "300px",
+              display: "block",
+              margin: "0 auto",
+            }}
+          />
+        </div>
+
         <select
           style={{
             display: "block",

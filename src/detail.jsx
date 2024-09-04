@@ -33,8 +33,15 @@ function detail() {
     point.y = e.clientY;
     const cursorPoint = point.matrixTransform(svg.getScreenCTM().inverse());
     setMousePosition({ x: cursorPoint.x, y: cursorPoint.y });
+    Math.round((mousePosition["x"] - 22) / 18);
+
+    clickyear(
+      Math.round((cursorPoint.x - 22 - 60) / 18) - 1 >= 0
+        ? years[Math.round((cursorPoint.x - 22 - 60) / 18)]
+        : years[0]
+    );
+    console.log(Math.round((cursorPoint.x - 22) / 18));
   };
-  console.log();
   useEffect(() => {
     let yearcount = [];
     for (let i = 2006; i < 2025; i++) {
@@ -217,7 +224,9 @@ function detail() {
       setcomment("ビリ");
     }
   }, [sortData, yearselect, anime]);
+
   function clickyear(item) {
+    console.log(item);
     setYS(item);
   }
 
@@ -277,41 +286,78 @@ function detail() {
         yScales[itema] = d3
           .scaleLinear()
           .domain([0, (Math.floor(ymax[itema] / 100) + 1) * 100])
-          .range([0, 500])
+          .range([0, 500 - 30])
           .nice();
       });
 
       return (
         <svg
-          width={a.length * 40 - 360}
-          height={530}
+          width={a.length * 40 - 300}
+          height={540}
           onMouseMove={handleMouseMove}
         >
-          <line x1="10" x2="10" y1="0" y2="500" stroke="black"></line>
+          <line x1="70" x2="70" y1="20" y2="500" stroke="black"></line>
           <line
-            x1="10"
-            x2={a.length * 40 - 360}
+            x1="70"
+            x2={a.length * 40 - 300}
             y1="500"
             y2="500"
             stroke="black"
           ></line>
-          <text x={20} y={15} onClick={() => clickyear(start)}>
-            放送開始日:{start}
+          <text
+            x={years.findIndex((item) => item == start) * 18 + 50}
+            y={15}
+            onClick={() => clickyear(start)}
+            stroke="red"
+            strokeWidth={1}
+          >
+            放送開始日
           </text>
+          <line
+            x1={years.findIndex((item) => item == start) * 18 + 22 + 60}
+            y1={20}
+            x2={years.findIndex((item) => item == start) * 18 + 22 + 60}
+            y2={510}
+            stroke="red"
+            stroke-dasharray="2 3"
+          />
 
           <line
-            x1={Math.round((mousePosition["x"] - 22) / 18) * 18 + 22}
+            x1={Math.round((mousePosition["x"] - 22 - 60) / 18) * 18 + 22 + 60}
             y1={20}
-            x2={Math.round((mousePosition["x"] - 22) / 18) * 18 + 22}
+            x2={Math.round((mousePosition["x"] - 22 - 60) / 18) * 18 + 22 + 60}
             y2={510}
             stroke="gray"
             stroke-dasharray="2 4"
           />
+          {states.length == 1 &&
+            yScales[states[0]].ticks().map((item, index) => (
+              <g key={index}>
+                <line
+                  x1={10 + 60}
+                  x2={20 + 60}
+                  y1={500 - yScales[states[0]](item)}
+                  y2={500 - yScales[states[0]](item)}
+                  stroke="grey"
+                ></line>
+                <text
+                  textAnchor="end"
+                  x="65"
+                  y={500 - yScales[states[0]](item) + 5}
+                  fontSize="12"
+                  fill="black"
+                  strokeWidth="0"
+                >
+                  {item}
+                </text>
+              </g>
+            ))}
+
           {years.map((item, index) => {
             return (
-              <g key={item}>
+              <g key={index}>
                 <text
-                  x={18 * index + 15}
+                  x={18 * index + 15 + 60}
                   y="520"
                   fontSize="10"
                   strokeWidth="0"
@@ -322,19 +368,22 @@ function detail() {
                 </text>
 
                 {states.map((itema, inddd) => {
+                  // console.log(states);
                   const cyValue = selectcounts(
                     selectanime["videodate"][item],
                     yScales[itema],
                     itema
                   );
 
+                  // console.log(item, yearselect);
+
                   return (
                     <>
                       {index < years.length - 1 && (
                         <line
-                          x1={18 * index + 22}
+                          x1={18 * index + 22 + 60}
                           y1={cyValue}
-                          x2={18 * (index + 1) + 22}
+                          x2={18 * (index + 1) + 22 + 60}
                           y2={selectcounts(
                             selectanime["videodate"][years[index + 1]],
                             yScales[itema],
@@ -345,7 +394,7 @@ function detail() {
                       )}
 
                       <circle
-                        cx={18 * index + 22}
+                        cx={18 * index + 22 + 60}
                         cy={cyValue}
                         r={item === yearselect ? 8 : 5}
                         fill={color(inddd)}
@@ -355,6 +404,9 @@ function detail() {
                             item === yearselect
                               ? "brightness(1)"
                               : "brightness(1.7)",
+                        }}
+                        onClick={(e) => {
+                          setstate([itema]);
                         }}
                       >
                         <title>
@@ -367,6 +419,55 @@ function detail() {
                   );
                 })}
               </g>
+            );
+          })}
+
+          <rect
+            x={mousePosition["x"] + 10}
+            y={mousePosition["y"]}
+            width={"150"}
+            height="150"
+            fill="#a0d8ef"
+            rx="15"
+            opacity={0.5}
+          />
+          <text
+            x={mousePosition["x"] + 10 + 10}
+            y={mousePosition["y"] + 30}
+            opacity={0.5}
+          >
+            {years[Math.round((mousePosition["x"] - 22 - 60) / 18)]}
+          </text>
+          <text x={87} y={540}>
+            2006年
+          </text>
+          {states.map((itema, index) => {
+            if (Math.round((mousePosition["x"] - 22 - 60) / 18) <= -1) {
+              return;
+            }
+
+            const cyValue = selectcounts(
+              selectanime["videodate"][
+                years[Math.round((mousePosition["x"] - 22 - 60) / 18)]
+              ],
+              yScales[itema],
+              itema
+            );
+            console.log(Math.round((mousePosition["x"] - 22 - 60) / 18));
+            return (
+              <text
+                x={mousePosition["x"] + 10 + 10}
+                y={mousePosition["y"] + index * 20 + 50}
+                opacity={0.5}
+              >
+                {itema} :
+                {(mousePosition["x"] - 22 - 60) / 18 >= 0 &&
+                (mousePosition["x"] - 22 - 60) / 18 < years.length - 1
+                  ? selectanime["videodate"][
+                      years[Math.round((mousePosition["x"] - 22 - 60) / 18)]
+                    ][itema]
+                  : selectanime["videodate"][years[0]][itema]}
+              </text>
             );
           })}
         </svg>
@@ -386,8 +487,6 @@ function detail() {
   };
 
   const draws = () => {
-    console.log(states.findIndex((A) => A == "videocount"));
-
     return (
       <div>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -476,6 +575,16 @@ function detail() {
           </div>
         </div>
         <div>{makeTxt()}</div>
+        {states.length != 4 && (
+          <button
+            style={{ position: "fixed", bottom: "200px", right: "100px" }}
+            onClick={() => {
+              setstate(["videocount", "viewcount", "likecount", "comentcount"]);
+            }}
+          >
+            リセット
+          </button>
+        )}
       </div>
     );
   };
