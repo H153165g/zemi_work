@@ -270,7 +270,7 @@ function detail() {
         <div style={{ textAlign: "center" }}>
           {stop ? (
             <img
-              src="/data/start.png"
+              src="start.png"
               onClick={(e) => {
                 setStop(false);
               }}
@@ -278,7 +278,7 @@ function detail() {
             />
           ) : (
             <img
-              src="/data/stop.png"
+              src="stop.png"
               onClick={(e) => {
                 setStop(true);
               }}
@@ -395,8 +395,8 @@ function detail() {
           {zanzo ? (
             data.map((item, i) => (
               <g
-                style={{ cursor: "pointer" }}
-                key={i}
+                style={{ cursor: "pointer", transition: "transform 0.3s" }}
+                key={item["name"]}
                 transform={`translate(0, ${30 * (i + 1) + 20})`}
                 transition="margin-right 4s"
                 onClick={(e) => g(item["name"])}

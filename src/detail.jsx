@@ -650,7 +650,7 @@ function detail() {
           </button>
         )}
         <img
-          src="/data/cancel.png"
+          src="cancel.png"
           onClick={() => Navigate(-1)}
           style={{
             cursor: "pointer",
